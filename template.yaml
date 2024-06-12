@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      CodeUri: .
+      MemorySize: 128
+      Timeout: 30  
+      Layers:
+        - !Ref PythonRequirementsLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole  # Provides basic Lambda execution permissions
+      Environment:
+        Variables:
+          CONSUMER_KEY: 'yF2vQp2dKX9avygbn72Sw5ZWx'
+          CONSUMER_SECRET: 'XxUv1t5lM1puaG7b3AO0lc1kgwYNmMg3x7f0PAYnXDujRDnnY5'
+          ACCESS_TOKEN: '3688691909-EH91DmEu3szAcmZKrByvL8EUzsAGiQymfT30eN6'
+          ACCESS_TOKEN_SECRET: 'YscfW7ViWCgNVr0iM5jiLVn59eVgCkJqFqzgtArP2bhnB'
+          USERNAME: !Ref TwitterUsername
+      Events:
+        MyEvent:
+          Type: Api
+          Properties:
+            Path: /analyze-tweets
+            Method: post
+
+  PythonRequirementsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: .
+      CompatibleRuntimes:
+        - python3.8
+
+  TwitterUsernameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /sentiment-analysis/username
+      Type: String
+      Value: !Ref TwitterUsername
